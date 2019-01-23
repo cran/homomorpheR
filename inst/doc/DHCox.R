@@ -1,4 +1,4 @@
-## ----echo=F--------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
 ### get knitr just the way we like it
 
 knitr::opts_chunk$set(
@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
 if (!require("survival")) {
     stop("this vignette requires the survival package")
 }
+library(homomorpheR)
 
 ## ------------------------------------------------------------------------
 sampleSize <- c(n1 = 1000, n2 = 500, n3 = 1500)
@@ -64,8 +65,6 @@ aggModel
 aggModel$loglik
 
 ## ------------------------------------------------------------------------
-library(gmp)
-library(homomorpheR)
 Site <- R6::R6Class("Site",
                     private = list(
                         ## name of the site
@@ -118,7 +117,7 @@ Site <- R6::R6Class("Site",
                                 nllValue <- self$nLL(beta)
                                 result.int <- floor(nllValue)
                                 result.frac <- nllValue - result.int
-                                result.fracnum <- as.bigq(numerator(as.bigq(result.frac) * self$den))
+                                result.fracnum <- gmp::as.bigq(gmp::numerator(gmp::as.bigq(result.frac) * self$den))
                                 pubkey <- self$pubkey
                                 enc.result.int <- pubkey$encrypt(result.int)
                                 enc.result.fracnum <- pubkey$encrypt(result.fracnum)
@@ -150,7 +149,7 @@ Site <- R6::R6Class("Site",
                                 sum <- private$intermediateResult
                                 privkey <- private$privkey
                                 intResult <- as.double(privkey$decrypt(sum$int) - offset$int)
-                                fracResult <- as.double(as.bigq(privkey$decrypt(sum$frac) - offset$frac) / den)
+                                fracResult <- as.double(gmp::as.bigq(privkey$decrypt(sum$frac) - offset$frac) / den)
                                 intResult + fracResult
                             } else {
                                 ## We're worker, so compute local negative log likelihood
